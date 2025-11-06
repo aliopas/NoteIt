@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+  
+html, body {
+  margin: 0;
+  padding: 0;
+}
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+}
+
+input::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D6D3D1 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #D6D3D1;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #A8A29E;
+}
+
+/* ===== Autofill Light Mode ===== */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* ===== Autofill Dark Mode ===== */
+@media (prefers-color-scheme: dark) {
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #1f2937 inset !important;
+    -webkit-text-fill-color: #f9fafb !important;
+  }
+
+  input[type="password"] + button,
+  input[type="text"] + button {
+    color: #d1d5db; /* text-gray-300 */
+  }
+
+  input[type="password"] + button:hover,
+  input[type="text"] + button:hover {
+    color: #f3f4f6; /* hover text-gray-100 */
+  }
+}
