@@ -61,7 +61,7 @@ cd noteit
 
 2️⃣ Install dependencies
 # Frontend
-cd client
+cd my-project
 npm install
 
 # Backend
