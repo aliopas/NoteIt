@@ -9,20 +9,39 @@ import authMiddleware from "./middleware/authMiddleware.js";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 // ===============================
 // 🔧 Middlewares
 // ===============================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.FRONTEND_URL, // رابط الـ Frontend بتاعك على Vercel أو Netlify
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      // السماح بـ requests من Postman أو بدون origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.json({ status: "✅ Server is running", environment: process.env.NODE_ENV });
+});
 
 // Auth routes
 app.use("/api/auth", authRoutes);
@@ -111,7 +130,7 @@ app.post("/api/notes", authMiddleware, async (req, res) => {
 });
 
 // ===============================
-// ✅ Update note - مع إضافة /api
+// ✅ Update note
 // ===============================
 app.put("/api/notes/:id", authMiddleware, async (req, res) => {
   const noteId = req.params.id;
@@ -147,7 +166,7 @@ app.put("/api/notes/:id", authMiddleware, async (req, res) => {
 });
 
 // ===============================
-// ✅ Delete note - مع إضافة /api
+// ✅ Delete note
 // ===============================
 app.delete("/api/notes/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
@@ -171,9 +190,16 @@ app.delete("/api/notes/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
 // ===============================
 // ✅ Start server
 // ===============================
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
