@@ -1,5 +1,6 @@
 import axios from "axios";
-
+import dotenv from "dotenv";
+dotenv.config(); 
 // ✅ استخدام environment variable
 export const API_BASE_URL = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
