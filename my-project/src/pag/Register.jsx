@@ -35,7 +35,8 @@ function Register() {
       setToastType('success');
       setShowToast(true);
     } catch (err) {
-      setToastMessage('Failed to register user! ' + (err.response?.data?.message || ''));
+      console.error('Registration error:', + (err.response?.data?.message || ''));
+      setToastMessage('Failed to register user! ');
       setToastType('error');
       setShowToast(true);
     } finally {

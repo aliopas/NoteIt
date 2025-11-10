@@ -1,9 +1,9 @@
 import axios from "axios";
-import { QueryClient } from "@tanstack/react-query";
 
+// ✅ استخدام environment variable
 export const API_BASE_URL = axios.create({
-  baseURL: "http://localhost:5000",
-  withCredentials: true, // لإرسال الكوكيز مع الطلبات
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -153,6 +153,8 @@ export const logoutUser = async () => {
     throw err;
   }
 };
+
+// ✅ Interceptor للتعامل مع 401 Unauthorized
 API_BASE_URL.interceptors.response.use(
   (response) => response,
   (error) => {
