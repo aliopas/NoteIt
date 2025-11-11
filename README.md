@@ -29,7 +29,7 @@ Database	CockroachDB (SQL-based, PostgreSQL compatible)
 Authentication	JWT (JSON Web Tokens)
 State Management / Caching	React Query
 UI / UX	Tailwind CSS + ShadCN-inspired components
-Deployment (Planned)	Frontend → Vercel / Backend → Render / Database → Cockroach Cloud
+Deployment (Planned)	Frontend → Vercel / Backend → railway / Database → Aiven
 🧠 Current Features (v1.0)
 
 ✅ User Authentication (Register / Login / Logout)
