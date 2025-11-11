@@ -1,6 +1,9 @@
 import axios from "axios";
+
+const api = import.meta.env.VITE_API_URL;
+
 export const API_BASE_URL = axios.create({
-  baseURL: "https://noteit-production-a118.up.railway.app",
+  baseURL: api||"http://localhost:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
