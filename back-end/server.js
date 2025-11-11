@@ -12,23 +12,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===============================
-// 🔧 Middlewares
+// 🔧 Middlewares - CORS أول حاجة!
 // ===============================
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  process.env.FRONTEND_URL,
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,  // ✅ هنا
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://note-it-pearl-eight.vercel.app"
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    exposedHeaders: ['Set-Cookie']
+    exposedHeaders: ['Set-Cookie'],
+    optionsSuccessStatus: 200
   })
 );
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -49,13 +51,11 @@ app.get("/api/data/all", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // 🗂️ Get all categories
     const categoriesResult = await pool.query(
       "SELECT * FROM categories WHERE user_id = $1",
       [userId]
     );
 
-    // 📝 Get all notes with category name
     const notesResult = await pool.query(
       `SELECT notes.*, categories.name AS category_name
        FROM notes
@@ -65,7 +65,6 @@ app.get("/api/data/all", authMiddleware, async (req, res) => {
       [userId]
     );
 
-    // 📦 Send combined response
     res.json({
       categories: categoriesResult.rows,
       notes: notesResult.rows,

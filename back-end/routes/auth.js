@@ -1,22 +1,23 @@
 import express from "express";
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
-import pool from "../db.js"; // الاتصال بقاعدة البيانات
+import pool from "../db.js";
 import dotenv from "dotenv";
 import authMiddleware from "../middleware/authMiddleware.js";
+
 dotenv.config();
 const router = express.Router();
-//////////
 
-/////////
+// Register
 router.post("/register", async (req, res) => {
   let { name, email, password } = req.body;
-  email = email.toLowerCase()
+  email = email.toLowerCase();
   name = name.toLowerCase();
+  
   try {
     const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: "البريد الإلكتروني مستخدم بالفعل" }); //<= here we should to add toast message in front-end // also validation in front-end
+      return res.status(400).json({ message: "البريد الإلكتروني مستخدم بالفعل" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,24 +33,25 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });
-/////////////////
 
-////////////////
+// Login
 router.post("/login", async (req, res) => {
   let { email, password } = req.body;
   email = email.toLowerCase();
-  console.log(email,password);
+  
   try {
     let byemailResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     let user = byemailResult.rows[0];
+    
     if (!user) {
       const byusernameResult = await pool.query("SELECT * FROM users WHERE name = $1", [email]);
       user = byusernameResult.rows[0];
 
-    if (!user) {
+      if (!user) {
         return res.status(401).json({ message: "Invalid username or password." });
       }
     }
+    
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid username or password." });
@@ -57,36 +59,37 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     
+    // إعدادات الـ cookie للـ production
     res.cookie("jwt", token, {
-      httpOnly: true,//to prevent XSS attacks
-      secure: false,//in production change to true
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, //one week
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    
     res.json({
       message: "تم تسجيل الدخول بنجاح",
       token,
       user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (err) {
-    console.error( err);
+    console.error(err);
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });
+
+// Logout
 router.post("/logout", (req, res) => {
   res.clearCookie("jwt", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     secure: process.env.NODE_ENV === "production",
   });
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
-  console.log("User logged out, cookie cleared.");
   res.json({ message: "Logged out successfully" });
 });
 
-///////////////
-
-//////////////
+// Profile
 router.get("/profile", async (req, res) => {
   const authHeader = req.headers.authorization;
 
@@ -103,6 +106,8 @@ router.get("/profile", async (req, res) => {
     res.status(401).json({ message: "التوكن غير صالح" });
   }
 });
+
+// Me
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     res.json({ user: req.user });
@@ -110,7 +115,5 @@ router.get("/me", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });
-
-
 
 export default router;
