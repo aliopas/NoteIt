@@ -1,6 +1,9 @@
+// ===============================
+// Server.js - Optimized Version
+// ===============================
+
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import pool from "./db.js";
 import authRoutes from "./routes/auth.js";
@@ -12,15 +15,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===============================
-// 🔧 Middlewares - CORS أول حاجة!
+// 🔧 Middlewares
 // ===============================
+
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.FRONTEND_URL, // your Vercel frontend URL
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://note-it-pearl-eight.vercel.app"
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("Blocked CORS request from:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
@@ -29,23 +43,30 @@ app.use(
   })
 );
 
-// Handle preflight requests
-app.options('*', cors());
+// Handle preflight requests explicitly
+app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 
+// Body parsing
 app.use(express.json());
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
+// Cookie parser
+app.use(cookieParser());
+
+// ===============================
+// 🔍 Health Check
+// ===============================
 app.get("/", (req, res) => {
-  res.json({ status: "✅ Server is running", environment: process.env.NODE_ENV });
+  res.json({ status: "✅ Server is running", environment: process.env.NODE_ENV || 'development' });
 });
 
-// Auth routes
+// ===============================
+// 🔑 Auth Routes
+// ===============================
 app.use("/api/auth", authRoutes);
 
 // ===============================
-// ✅ Unified Endpoint: Get all user data
+// 📦 Unified Endpoint: Get all user data
 // ===============================
 app.get("/api/data/all", authMiddleware, async (req, res) => {
   const userId = req.user.id;
@@ -185,14 +206,19 @@ app.delete("/api/notes/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// Error handling middleware
+// ===============================
+// ⚠️ Error handling middleware
+// ===============================
 app.use((err, req, res, next) => {
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({ error: err.message });
+  }
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
 
 // ===============================
-// ✅ Start server
+// 🚀 Start server
 // ===============================
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
