@@ -1,10 +1,14 @@
 import axios from "axios";
 
+// ✅ Dynamic API URL based on environment
 const api = import.meta.env.VITE_API_URL;
+const API_URL = api && api.trim() ? api.trim() : "http://localhost:3000";
+
+console.log("🌐 API Base URL:", API_URL);
 
 export const API_BASE_URL = axios.create({
-  baseURL: api||"http://localhost:3000",
-  withCredentials: true,
+  baseURL: API_URL,
+  withCredentials: true, // ✅ Essential for sending cookies
   headers: {
     "Content-Type": "application/json",
   },

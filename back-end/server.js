@@ -1,5 +1,5 @@
 // ===============================
-// Server.js - Optimized Version
+// Server.js - Production-ready with JWT HttpOnly cookies
 // ===============================
 
 import express from "express";
@@ -18,32 +18,52 @@ const PORT = process.env.PORT || 3000;
 // 🔧 Middlewares
 // ===============================
 
-// Allowed origins for CORS
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  process.env.FRONTEND_URL, // your Vercel frontend URL
-];
+// ✅ Allowed origins for CORS - Dynamic configuration
+const getAllowedOrigins = () => {
+  const baseOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    process.env.FRONTEND_URL // e.g. Vercel URL
+  ].filter(Boolean);
+
+  // Add additional origins from environment variable if available
+  if (process.env.ALLOWED_ORIGINS) {
+    const additionalOrigins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+    baseOrigins.push(...additionalOrigins);
+  }
+
+  // Remove duplicates
+  return [...new Set(baseOrigins)];
+};
+
+const allowedOrigins = getAllowedOrigins();
+console.log("✅ Allowed CORS origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (Postman, CURL) or allowed origins
+      if (!origin || allowedOrigins.some(allowed => {
+        // Handle trailing slashes and protocol variations
+        const normalizeUrl = (url) => url.toLowerCase().replace(/\/$/, '');
+        return normalizeUrl(origin) === normalizeUrl(allowed);
+      })) {
         callback(null, true);
       } else {
-        console.warn("Blocked CORS request from:", origin);
+        console.warn("❌ Blocked CORS request from:", origin);
+        console.warn("Allowed origins:", allowedOrigins);
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    credentials: true, // 🔑 Required for cookies
+    methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization','Cookie'],
     exposedHeaders: ['Set-Cookie'],
     optionsSuccessStatus: 200
   })
 );
 
-// Handle preflight requests explicitly
+// Handle preflight requests
 app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 
 // Body parsing

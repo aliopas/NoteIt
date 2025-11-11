@@ -59,13 +59,18 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     
-    // إعدادات الـ cookie للـ production
+    // ✅ Cookie settings optimized for production
+    const isProduction = process.env.NODE_ENV === "production";
+    
     res.cookie("jwt", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: isProduction,  // HTTPS only in production
+      sameSite: isProduction ? "none" : "lax",  // "none" allows cross-origin
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/"  // Available across all routes
     });
+    
+    console.log(`✅ JWT Cookie set - Production: ${isProduction}`);
     
     res.json({
       message: "تم تسجيل الدخول بنجاح",
@@ -80,10 +85,13 @@ router.post("/login", async (req, res) => {
 
 // Logout
 router.post("/logout", (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  
   res.clearCookie("jwt", {
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    path: "/"
   });
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.json({ message: "Logged out successfully" });
