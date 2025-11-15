@@ -1,6 +1,6 @@
 # 🗒️ NoteIt – Personal Notes Management App
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://your-app.vercel.app)
+[![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://portfolio-kappa-lyart-4pd70xvr69.vercel.app)
 [![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/aliopas/NoteIt)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -63,7 +63,7 @@
 
 ---
 
-🔗 **[Try it Live](https://your-app.vercel.app)** | 💻 **[View Source Code](https://github.com/aliopas/NoteIt)**
+🔗 **[Try it Live](https://portfolio-kappa-lyart-4pd70xvr69.vercel.app)** | 💻 **[View Source Code](https://github.com/aliopas/NoteIt)**
 
 ---
 
@@ -96,7 +96,7 @@
   </tr>
   <tr>
     <td><b>Database</b></td>
-    <td>CockroachDB (PostgreSQL-compatible)</td>
+    <td>PostgreSQL (Aiven Cloud) with node-postgres (pg)</td>
   </tr>
   <tr>
     <td><b>Authentication</b></td>
@@ -199,10 +199,11 @@ npm install
 **Backend (.env):**
 ```env
 PORT=3000
-DATABASE_URL=your_cockroachdb_connection_string
+DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 JWT_SECRET=your_super_secret_key_here
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 ```
 
 **Frontend (.env.local):**
@@ -212,11 +213,37 @@ VITE_API_URL=http://localhost:3000
 
 ### 4️⃣ Database Setup
 
-Run the SQL schema to create tables:
+Create the required tables in your PostgreSQL database:
 
-```bash
-# Connect to your CockroachDB and run:
-# schema.sql file contents
+```sql
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Categories table
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(name, user_id)
+);
+
+-- Notes table
+CREATE TABLE notes (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### 5️⃣ Run the Application
@@ -321,11 +348,12 @@ NoteIt/
 4. Add environment variables
 5. Deploy!
 
-### Database (CockroachDB Cloud)
+### Database (Aiven PostgreSQL)
 
-1. Create cluster on [CockroachDB](https://cockroachlabs.cloud)
-2. Copy connection string
-3. Update `DATABASE_URL` in backend environment
+1. Create PostgreSQL instance on [Aiven](https://aiven.io)
+2. Copy connection string from Aiven dashboard
+3. Update `DATABASE_URL` in backend environment variables
+4. Ensure SSL mode is enabled (`?sslmode=require`)
 
 ---
 
@@ -377,12 +405,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👨‍💻 About the Developer
 
 **Ali Alaa** - Full-Stack Developer
@@ -391,14 +413,14 @@ I'm passionate about building modern, scalable web applications with clean code 
 
 ### 🔗 Connect with Me
 
-- 💼 [LinkedIn](https://linkedin.com/in/yourprofile)
+- 💼 [LinkedIn](https://www.linkedin.com/in/ali-alaa-salama-414267323)
 - 🐙 [GitHub](https://github.com/aliopas)
-- 📧 [Email](mailto:your.email@example.com)
-- 🌐 Portfolio: Coming Soon
+- 📧 [Email](mailto:ali.alaaeldin.2025@gmail.com)
+- 🌐 [Portfolio](https://portfolio-kappa-lyart-4pd70xvr69.vercel.app/)
 
 ### 💡 Skills
 
-`React` `Node.js` `Express` `PostgreSQL` `CockroachDB` `JWT` `React Query` `Tailwind CSS` `Git` `REST APIs` `Full-Stack Development`
+`React` `Node.js` `Express` `PostgreSQL` `Aiven` `pg (node-postgres)` `JWT` `React Query` `Tailwind CSS` `Git` `REST APIs` `Full-Stack Development` `Vercel` `Railway`
 
 ---
 
