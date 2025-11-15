@@ -435,4 +435,4 @@ Have suggestions or found a bug? Feel free to [open an issue](https://github.com
 ---
 
 <p align="center">Made with ❤️ by Ali Alaa</p>
-<p align="center">© 2024 NoteIt. All rights reserved.</p>
+<p align="center">© 2025 NoteIt. All rights reserved.</p>
