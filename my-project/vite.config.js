@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/', // ⬅️ مهم جداً لـ Vercel
   server: {
     port: 5173,
     strictPort: false,
@@ -18,6 +19,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false
+    sourcemap: false,
+    emptyOutDir: true // ⬅️ أضفت دي كمان علشان تنضف الفولدر قبل البيلد
   }
 })
