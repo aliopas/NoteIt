@@ -2,8 +2,6 @@
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://portfolio-kappa-lyart-4pd70xvr69.vercel.app)
 [![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/aliopas/NoteIt)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
-
 > A modern, full-stack notes management application with secure authentication, category organization, and a clean, responsive interface.
 
 ---
